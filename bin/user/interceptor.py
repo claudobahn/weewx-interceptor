@@ -720,6 +720,84 @@ class Consumer(object):
             return calendar.timegm(ts)
 
 
+class MASTBuoy(Consumer):
+    DEFAULT_SENSOR_MAP = {
+        'gpsLatitude': 'gps_latitude',
+        'gpsLongitude': 'gps_longitude',
+        'currentSpeed': 'current_speed',
+        'currentDir': 'current_dir',
+        'windSpeed': 'wind_speed',
+        'windDir': 'wind_dir',
+        'waveMeanHeight': 'wave_height',
+        'waveDominantPeriod': 'wave_period',
+    }
+
+    def default_sensor_map(self):
+        return MASTBuoy.DEFAULT_SENSOR_MAP
+
+    def __init__(self, **stn_dict):
+        super(MASTBuoy, self).__init__(
+            MASTBuoy.Parser(), handler=MASTBuoy.Handler, **stn_dict)
+
+    class Handler(Consumer.Handler):
+
+        def get_response(self):
+            return 'success'
+
+    class Parser(Consumer.Parser):
+
+        # map labels to observation names
+        LABEL_MAP = {
+            'gpsLat': 'gps_latitude',
+            'gpsLong': 'gps_longitude',
+            'waterSpeedKn': 'current_speed',
+            'waterDirection': 'current_dir',
+            'windSpeedKph': 'wind_speed',
+            'windDirectionDegrees': 'wind_dir',
+            'waveHeightFt': 'wave_height',
+            'wavePeriodSeconds': 'wave_period',
+        }
+
+        IGNORED_LABELS = [
+        ]
+
+        def parse(self, s):
+            pkt = dict()
+            try:
+                data = _cgi_to_dict(s)
+                pkt['dateTime'] = self.decode_datetime(
+                    data.pop('dateutc', int(time.time() + 0.5)))
+                pkt['usUnits'] = weewx.US
+
+                for n in data:
+                    if n in self.LABEL_MAP:
+                        obs_name = self.LABEL_MAP[n]
+                        pkt[obs_name] = self.decode_float(data[n])
+                        if n == 'waterSpeedKn':
+                            pkt[obs_name] = pkt[obs_name] * 1.1507794
+                        elif n == 'windSpeedKph':
+                            pkt[obs_name] = pkt[obs_name] * 0.6213712
+
+                    elif n in self.IGNORED_LABELS:
+                        val = data[n]
+                        if n == 'PASSWORD':
+                            val = 'X' * len(data[n])
+                        logdbg("ignored parameter %s=%s" % (n, val))
+                    else:
+                        loginf("unrecognized parameter %s=%s" % (n, data[n]))
+
+            except ValueError as e:
+                logerr("parse failed for %s: %s" % (s, e))
+            return pkt
+
+        @staticmethod
+        def decode_float(x):
+            # these stations send a value of -9999 to indicate no value, so
+            # convert that to a proper None.
+            x = Consumer.Parser.decode_float(x)
+            return None if x == -9999 else x
+
+
 # capture data from hardware that sends using the weather underground protocol
 
 class WUClient(Consumer):
@@ -2498,7 +2576,7 @@ class InterceptorConfigurationEditor(weewx.drivers.AbstractConfEditor):
         device_type = self._prompt(
             'device_type', 'acurite-bridge',
             ['acurite-bridge', 'observer', 'lw30x', 'lacrosse-bridge',
-             'wu-client', 'ecowitt-client'])
+             'wu-client', 'ecowitt-client', 'mast-buoy'])
         return {'device_type': device_type}
 
 
@@ -2511,7 +2589,8 @@ class InterceptorDriver(weewx.drivers.AbstractDevice):
         'lacrosse-bridge': GW1000U,
         'ecowitt-client': EcowittClient,
         'fineoffset-bridge': EcowittClient, # for backward compatibility
-        'wu-client': WUClient
+        'wu-client': WUClient,
+        'mast-buoy': MASTBuoy
     }
 
     def __init__(self, **stn_dict):
