@@ -722,14 +722,16 @@ class Consumer(object):
 
 class MASTBuoy(Consumer):
     DEFAULT_SENSOR_MAP = {
+        'currentDir': 'current_dir',
+        'currentSpeed': 'current_speed',
         'gpsLatitude': 'gps_latitude',
         'gpsLongitude': 'gps_longitude',
-        'currentSpeed': 'current_speed',
-        'currentDir': 'current_dir',
-        'windSpeed': 'wind_speed',
+        'rxRSSI': 'rx_rssi',
+        'rxSNR': 'rx_snr',
         'windDir': 'wind_dir',
-        'waveMeanHeight': 'wave_height',
+        'windSpeed': 'wind_speed',
         'waveDominantPeriod': 'wave_period',
+        'waveMeanHeight': 'wave_height',
     }
 
     def default_sensor_map(self):
@@ -750,12 +752,14 @@ class MASTBuoy(Consumer):
         LABEL_MAP = {
             'gpsLat': 'gps_latitude',
             'gpsLong': 'gps_longitude',
-            'waterSpeedKn': 'current_speed',
+            'rxRSSI': 'rx_rssi',
+            'rxSNR': 'rx_snr',
             'waterDirection': 'current_dir',
-            'windSpeedKph': 'wind_speed',
-            'windDirectionDegrees': 'wind_dir',
+            'waterSpeedKn': 'current_speed',
             'waveHeightFt': 'wave_height',
             'wavePeriodSeconds': 'wave_period',
+            'windDirectionDegrees': 'wind_dir',
+            'windSpeedKph': 'wind_speed',
         }
 
         IGNORED_LABELS = [
