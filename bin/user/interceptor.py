@@ -778,7 +778,10 @@ class MASTBuoy(Consumer):
                         obs_name = self.LABEL_MAP[n]
                         pkt[obs_name] = self.decode_float(data[n])
                         if n == 'waterSpeedKn':
-                            pkt[obs_name] = pkt[obs_name] * 1.1507794
+                            if pkt[obs_name] == -1:
+                                pkt[obs_name] = None
+                            else:
+                                pkt[obs_name] = pkt[obs_name] * 1.1507794
                         elif n == 'windSpeedKph':
                             pkt[obs_name] = pkt[obs_name] * 0.6213712
 
