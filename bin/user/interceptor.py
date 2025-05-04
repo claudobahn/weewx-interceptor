@@ -724,14 +724,19 @@ class MASTBuoy(Consumer):
     DEFAULT_SENSOR_MAP = {
         'currentDir': 'current_dir',
         'currentSpeed': 'current_speed',
+        'gpsAltitude': 'gps_altitude',
         'gpsLatitude': 'gps_latitude',
         'gpsLongitude': 'gps_longitude',
+        'rxFrequencyError': 'rx_frequency_error',
         'rxRSSI': 'rx_rssi',
         'rxSNR': 'rx_snr',
         'windDir': 'wind_dir',
         'windSpeed': 'wind_speed',
-        'waveDominantPeriod': 'wave_period',
-        'waveMeanHeight': 'wave_height',
+        'waveDominantPeriod': 'wave_dominant_period',
+        'waveMaximumHeight': 'wave_maximum_height',
+        'waveMeanHeight': 'wave_mean_height',
+        'waveMeanHeightHighestTenth': 'wave_mean_height_highest_tenth',
+        'waveSignificantHeight': 'wave_significant_height',
     }
 
     def default_sensor_map(self):
@@ -750,14 +755,22 @@ class MASTBuoy(Consumer):
 
         # map labels to observation names
         LABEL_MAP = {
+            'gpsAltitudeMeters': 'gps_altitude',
             'gpsLat': 'gps_latitude',
+            'gpsLatitude': 'gps_latitude',
             'gpsLong': 'gps_longitude',
+            'gpsLongitude': 'gps_longitude',
+            'rxFrequencyError': 'rx_frequency_error',
             'rxRSSI': 'rx_rssi',
             'rxSNR': 'rx_snr',
             'waterDirection': 'current_dir',
+            'surfaceCurrentDirection': 'current_dir',
             'waterSpeedKn': 'current_speed',
-            'waveHeightFt': 'wave_height',
-            'wavePeriodSeconds': 'wave_period',
+            'surfaceCurrentSpeedKts': 'current_speed',
+            'waveHeightFt': 'wave_maximum_height',
+            'maximumWaveHeightFt': 'wave_maximum_height',
+            'wavePeriodSeconds': 'wave_dominant_period',
+            'dominantWavePeriodSeconds': 'wave_dominant_period',
             'windDirectionDegrees': 'wind_dir',
             'windSpeedKph': 'wind_speed',
         }
@@ -777,11 +790,10 @@ class MASTBuoy(Consumer):
                     if n in self.LABEL_MAP:
                         obs_name = self.LABEL_MAP[n]
                         pkt[obs_name] = self.decode_float(data[n])
-                        if n == 'waterSpeedKn':
-                            if pkt[obs_name] == -1:
-                                pkt[obs_name] = None
-                            else:
-                                pkt[obs_name] = pkt[obs_name] * 1.1507794
+                        if n == 'gpsAltitudeMeters':
+                            pkt[obs_name] = pkt[obs_name] * 3.28
+                        elif n == 'waterSpeedKn' or n == 'surfaceCurrentSpeedKts':
+                            pkt[obs_name] = pkt[obs_name] * 1.1507794
                         elif n == 'windSpeedKph':
                             pkt[obs_name] = pkt[obs_name] * 0.6213712
 
