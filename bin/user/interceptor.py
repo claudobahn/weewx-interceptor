@@ -727,16 +727,20 @@ class MASTBuoy(Consumer):
         'gpsAltitude': 'gps_altitude',
         'gpsLatitude': 'gps_latitude',
         'gpsLongitude': 'gps_longitude',
+        'outHumidity': 'air_humidity',
+        'outTemp': 'air_temperature',
+        'pressure': 'air_pressure',
         'rxFrequencyError': 'rx_frequency_error',
         'rxRSSI': 'rx_rssi',
         'rxSNR': 'rx_snr',
-        'windDir': 'wind_dir',
-        'windSpeed': 'wind_speed',
         'waveDominantPeriod': 'wave_dominant_period',
         'waveMaximumHeight': 'wave_maximum_height',
         'waveMeanHeight': 'wave_mean_height',
         'waveMeanHeightHighestTenth': 'wave_mean_height_highest_tenth',
         'waveSignificantHeight': 'wave_significant_height',
+        'windDir': 'wind_dir',
+        'windGust': 'wind_gust',
+        'windSpeed': 'wind_speed',
     }
 
     def default_sensor_map(self):
@@ -773,6 +777,10 @@ class MASTBuoy(Consumer):
             'dominantWavePeriodSeconds': 'wave_dominant_period',
             'windDirectionDegrees': 'wind_dir',
             'windSpeedKph': 'wind_speed',
+            'windGustKph': 'wind_gust',
+            'airPressureInHg': 'air_pressure',
+            'airTemperatureF': 'air_temperature',
+            'airHumidityPercent': 'air_humidity',
         }
 
         IGNORED_LABELS = [
